@@ -21,4 +21,4 @@ class Server(models.Model):
 class ServerPlugins(models.Model):
     server = models.ForeignKey(Server, on_delete=models.RESTRICT)
     plugin = models.ForeignKey(Plugin, on_delete=models.RESTRICT)
-    token = models.CharField(max_length=16)
+    token = models.CharField(max_length=16, null=True, blank=True)
