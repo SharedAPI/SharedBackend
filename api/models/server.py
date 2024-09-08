@@ -1,5 +1,7 @@
 import uuid
 from django.db import models
+from .plugin import Plugin
+
 
 class Server(models.Model):
     
@@ -12,3 +14,11 @@ class Server(models.Model):
           editable = False) 
     
      name = models.CharField(max_length=256)
+
+     plugins = models.ManyToManyField(Plugin, related_name="servers", through="ServerPlugins")
+
+
+class ServerPlugins(models.Model):
+    server = models.ForeignKey(Server, on_delete=models.RESTRICT)
+    plugin = models.ForeignKey(Plugin, on_delete=models.RESTRICT)
+    token = models.CharField(max_length=16)
