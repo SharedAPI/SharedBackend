@@ -21,7 +21,7 @@ class ServerPluginsViewSet(viewsets.ModelViewSet):
 
     def create(self, request, pk=None):
         if request.method != "POST":
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
         serializer = ServerPluginsSerializer(
             data=request.data, context={"request": request}
