@@ -9,37 +9,72 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Plugin',
+            name="Plugin",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=256)),
-                ('schema', models.JSONField()),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
+                ("schema", models.JSONField()),
             ],
         ),
         migrations.CreateModel(
-            name='Server',
+            name="Server",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=256)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
             ],
         ),
         migrations.CreateModel(
-            name='ServerPlugins',
+            name="ServerPlugins",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(blank=True, max_length=16, null=True)),
-                ('plugin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='api.plugin')),
-                ('server', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='api.server')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.CharField(blank=True, max_length=16, null=True)),
+                (
+                    "plugin",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT, to="api.plugin"
+                    ),
+                ),
+                (
+                    "server",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT, to="api.server"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='server',
-            name='plugins',
-            field=models.ManyToManyField(related_name='servers', through='api.ServerPlugins', to='api.plugin'),
+            model_name="server",
+            name="plugins",
+            field=models.ManyToManyField(
+                related_name="servers", through="api.ServerPlugins", to="api.plugin"
+            ),
         ),
     ]
