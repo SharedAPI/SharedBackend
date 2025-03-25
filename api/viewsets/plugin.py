@@ -64,24 +64,22 @@ class PluginViewSet(viewsets.ModelViewSet):
                 )
 
                 if not serialized_dynamic_table.is_valid():
-                    raise Exception("Error during serialization of dynamic table")
+                    raise Exception(
+                        f"Error during serialization of dynamic table:\n {serialized_dynamic_table.errors}"
+                    )
                 dynamic_table = serialized_dynamic_table.save()
-                print(f"Table Created with ID: {dynamic_table.id}")
-                print(f"{dynamic_table.__dict__}")
 
                 columns = table.get("columns", [])
                 if not columns:
                     raise Exception("Columns should be provide to create a schema")
 
                 for column in columns:
-                    print("TABLE CREATEDDZZQDZ")
                     DynamicColumn.objects.create(
                         table=dynamic_table,
                         name=column["name"],
                         type=column["type"],
                         is_primary=column.get("primary", False),
                     )
-                    print("TABLE CREATEDdZQUHDIZUh")
             # TODO Faire fichier de migration automatique est l'appliquer
 
             return JsonResponse(
