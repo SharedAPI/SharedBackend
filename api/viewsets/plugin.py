@@ -1,13 +1,11 @@
-import json
+from http import HTTPMethod
 from typing import Any, Dict, List
+
+from django.http import JsonResponse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
-from django.http import JsonResponse
-
-from http import HTTPMethod
-
 
 from api.models.column import DynamicColumn
 from api.models.plugin import Plugin
@@ -31,7 +29,6 @@ class PluginViewSet(viewsets.ModelViewSet):
             print(f"Plugin Created with ID: {plugin.id}")
             print(f"{plugin.__dict__}")
 
-
             data = serialized_data.data
             # Keep tracking the composition of plugin in our databse
             schema: Dict[str, Any] = data.get("schema", {})
@@ -39,7 +36,7 @@ class PluginViewSet(viewsets.ModelViewSet):
                 return JsonResponse(
                     {
                         "message": "Plugin registered but no schema provided",
-                        "plugin": data
+                        "plugin": data,
                     },
                     status=status.HTTP_201_CREATED,
                 )
@@ -59,10 +56,12 @@ class PluginViewSet(viewsets.ModelViewSet):
                 if not name:
                     raise Exception("All table should have a name")
 
-                serialized_dynamic_table = DynamicTableSerializer(data={
-                    "plugin": plugin.id,
-                    "name": name,
-                })
+                serialized_dynamic_table = DynamicTableSerializer(
+                    data={
+                        "plugin": plugin.id,
+                        "name": name,
+                    }
+                )
 
                 if not serialized_dynamic_table.is_valid():
                     raise Exception("Error during serialization of dynamic table")

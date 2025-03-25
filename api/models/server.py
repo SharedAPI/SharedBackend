@@ -1,10 +1,11 @@
 import uuid
+
 from django.db import models
+
 from .plugin import Plugin
 
 
 class Server(models.Model):
-
     def __str__(self) -> str:
         return self.name
 

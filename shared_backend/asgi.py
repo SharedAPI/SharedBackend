@@ -1,5 +1,4 @@
-"""
-ASGI config for shared_backend project.
+"""ASGI config for shared_backend project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

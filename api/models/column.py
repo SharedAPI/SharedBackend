@@ -1,9 +1,9 @@
 from django.db import models
+
 from .table import DynamicTable
 
 
 class DynamicColumn(models.Model):
-
     def __str__(self) -> str:
         return f"{self.table.plugin.name}_{self.table.name}_{self.name}"
 

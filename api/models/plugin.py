@@ -1,9 +1,9 @@
 import uuid
+
 from django.db import models
 
 
 class Plugin(models.Model):
-
     def __str__(self) -> str:
         return self.name
 
