@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from api.views.add_plugin import ServersPluginManagementView
 from api.viewsets.plugin import PluginViewSet
 from api.viewsets.server import ServerViewSet
 
@@ -13,4 +14,9 @@ router.register(r"servers", ServerViewSet, basename="servers")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path(
+        "servers/<uuid:server_id>/plugins",
+        ServersPluginManagementView.as_view(),
+        name="servers_plugin_management",
+    ),
 ]
