@@ -6,40 +6,72 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Plugin',
+            name="DynamicTable",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=256)),
-                ('schema', models.JSONField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
             ],
         ),
         migrations.CreateModel(
-            name='Server',
+            name="Plugin",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=256)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
+                ("description", models.CharField(max_length=4096)),
+                ("schema", models.JSONField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='ServerPlugins',
+            name="DynamicColumn",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(blank=True, max_length=16, null=True)),
-                ('plugin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='api.plugin')),
-                ('server', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='api.server')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("type", models.CharField(max_length=50)),
+                ("is_primary", models.BooleanField(default=False)),
+                (
+                    "table",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="api.dynamictable",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='server',
-            name='plugins',
-            field=models.ManyToManyField(related_name='servers', through='api.ServerPlugins', to='api.plugin'),
+            model_name="dynamictable",
+            name="plugin",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="api.plugin"
+            ),
         ),
     ]

@@ -1,5 +1,4 @@
-"""
-URL configuration for shared_backend project.
+"""URL configuration for shared_backend project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -15,13 +14,31 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.urls import include, path
 from django.views.generic.base import RedirectView
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view as swagger_get_schema_view
 
+schema_view = swagger_get_schema_view(
+    openapi.Info(
+        title="Shared API",
+        default_version="0.1.0",
+        description="API Documentation for Shared",
+    ),
+    public=True,
+)
 urlpatterns = [
-    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('favicon/favicon.ico'))),
-    path('', RedirectView.as_view(url="api/")),
-    path('api/', include('api.urls')),
-    path('admin/', admin.site.urls),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=staticfiles_storage.url("favicon/favicon.ico")),
+    ),
+    path("", RedirectView.as_view(url="api/")),
+    path("api/", include("api.urls")),
+    path("admin/", admin.site.urls),
+    path(
+        "api/docs",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="swagger_schema",
+    ),
 ]

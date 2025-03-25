@@ -4,18 +4,16 @@ from .plugin import Plugin
 
 
 class Server(models.Model):
-    
-     def __str__(self) -> str:
-          return self.name
-     
-     id = models.UUIDField( 
-          primary_key = True, 
-          default = uuid.uuid4, 
-          editable = False) 
-    
-     name = models.CharField(max_length=256)
+    def __str__(self) -> str:
+        return f"{self.name}_[{self.id}]"
 
-     plugins = models.ManyToManyField(Plugin, related_name="servers", through="ServerPlugins")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    name = models.CharField(max_length=256)
+
+    plugins = models.ManyToManyField(
+        Plugin, related_name="servers", through="ServerPlugins"
+    )
 
 
 class ServerPlugins(models.Model):
