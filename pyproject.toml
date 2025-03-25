@@ -1,0 +1,4 @@
+
+[tool.pyright]
+venvPath = "/home/dev/.virtualenvs/"
+venv = "shared"
