@@ -1,12 +1,13 @@
 import uuid
+
 from django.db import models
+
 from .plugin import Plugin
 
 
 class Server(models.Model):
-
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name}_[{self.id}]"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
