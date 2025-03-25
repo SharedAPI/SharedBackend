@@ -8,4 +8,4 @@ from api.models.plugin import Plugin
 class PluginSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plugin
-        fields = "__all__"
+        exclude = ["schema"]
