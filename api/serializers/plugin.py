@@ -22,7 +22,7 @@ class PluginVersionSerializer(serializers.ModelSerializer):
 class ReadOnlyPluginVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PluginVersion
-        exclude = ["schema"]
+        exclude = ["schema", "plugin"]
 
 
 class AddPluginVersionSerializer(serializers.ModelSerializer):

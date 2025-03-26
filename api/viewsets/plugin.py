@@ -9,10 +9,15 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from api.models.column import DynamicColumn
 from api.models.plugin import Plugin, PluginVersion
-from api.serializers.plugin import AddPluginVersionSerializer, PluginSerializer
+from api.serializers.plugin import (
+    AddPluginVersionSerializer,
+    PluginSerializer,
+    ReadOnlyPluginVersionSerializer,
+)
 from api.serializers.table import DynamicTableSerializer
 from api.utils import CustomResponseHandler
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 
 
 class PluginViewSet(CustomResponseHandler, viewsets.ModelViewSet):
@@ -20,9 +25,24 @@ class PluginViewSet(CustomResponseHandler, viewsets.ModelViewSet):
     serializer_class = PluginSerializer
     # All the classic method are provide such as list,create,retrieve,update,partial_update, destroy
 
-    @swagger_auto_schema(request_body=AddPluginVersionSerializer)
-    @action(detail=True, methods=[HTTPMethod.POST], url_path="versions")
+    @swagger_auto_schema(method="post", request_body=AddPluginVersionSerializer)
+    @action(detail=True, methods=[HTTPMethod.GET, HTTPMethod.POST], url_path="versions")
     def add_version(self, request: Request, pk=None) -> Response:
+        if request.method == HTTPMethod.GET:
+            return self.get_versions(request, pk)
+        elif request.method == HTTPMethod.POST:
+            return self.post_version(request, pk)
+        else:
+            return self.error_response("Invalid method")
+
+    def get_versions(self, request: Request, pk=None) -> Response:
+        versions = PluginVersion.objects.filter(plugin_id=pk)
+        serialized_plugin_versions = ReadOnlyPluginVersionSerializer(
+            versions, many=True
+        )
+        return Response(serialized_plugin_versions.data, status=status.HTTP_200_OK)
+
+    def post_version(self, request: Request, pk=None) -> Response:
         plugin = get_object_or_404(Plugin, pk=pk)
         serialized_data = AddPluginVersionSerializer(
             data=request.data, context={"plugin": plugin}
