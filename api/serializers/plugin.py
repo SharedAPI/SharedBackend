@@ -25,6 +25,12 @@ class ReadOnlyPluginVersionSerializer(serializers.ModelSerializer):
         exclude = ["schema", "plugin"]
 
 
+class DeprecatedPluginVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PluginVersion
+        fields = ["deprecated"]
+
+
 class AddPluginVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PluginVersion
