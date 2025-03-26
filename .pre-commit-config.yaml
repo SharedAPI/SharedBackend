@@ -6,18 +6,10 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.5
-    hooks:
-      - id: docformatter
-  # - repo: https://github.com/RobertCraigie/pyright-python
-  #   rev: v1.1.397
+  # - repo: https://github.com/PyCQA/docformatter
+  #   rev: v1.7.5
   #   hooks:
-  #     - id: pyright
-  #       language_version: /home/dev/.virtualenvs/shared/bin/python
-  #       name: pyright
-  #       language: python
-  #       files: \.py$
+  #     - id: docformatter
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.5.3
     hooks:
