@@ -36,11 +36,11 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         server = get_object_or_404(Server, pk=server_id)
 
         # Validate if the plugin is already added to the server
-        plugin_id = request.data.get("plugin")
-        if not plugin_id:
-            return self.error_response("Plugin ID is required")
+        plugin_version_id = request.data.get("plugin_version")
+        if not plugin_version_id:
+            return self.error_response("Plugin Version ID is required")
 
-        if server.plugin_versions.filter(id=plugin_id).exists():
+        if server.plugin_versions.filter(id=plugin_version_id).exists():
             return self.error_response("Plugin already added to the server")
 
         serializer = AddPluginSerializer(data=request.data, context={"server": server})
