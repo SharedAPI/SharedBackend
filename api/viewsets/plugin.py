@@ -6,44 +6,69 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
-
+from django.shortcuts import get_object_or_404
 from api.models.column import DynamicColumn
-from api.models.plugin import Plugin
-from api.serializers.plugin import PluginSerializer
+from api.models.plugin import Plugin, PluginVersion
+from api.serializers.plugin import (
+    AddPluginVersionSerializer,
+    PluginSerializer,
+    ReadOnlyPluginVersionSerializer,
+)
 from api.serializers.table import DynamicTableSerializer
 from api.utils import CustomResponseHandler
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 
 
-class PluginViewSet(viewsets.ModelViewSet, CustomResponseHandler):
+class PluginViewSet(CustomResponseHandler, viewsets.ModelViewSet):
     queryset = Plugin.objects.all()
     serializer_class = PluginSerializer
     # All the classic method are provide such as list,create,retrieve,update,partial_update, destroy
 
-    # Override create method because DynamicTable and DynamicColumn have to be created
-    def create(self: viewsets.ModelViewSet, request: Request) -> Response:
-        serialized_data: PluginSerializer = self.get_serializer(data=request.data)
+    @swagger_auto_schema(method="post", request_body=AddPluginVersionSerializer)
+    @action(detail=True, methods=[HTTPMethod.GET, HTTPMethod.POST], url_path="versions")
+    def add_version(self, request: Request, pk=None) -> Response:
+        if request.method == HTTPMethod.GET:
+            return self.get_versions(request, pk)
+        elif request.method == HTTPMethod.POST:
+            return self.post_version(request, pk)
+        else:
+            return self.error_response("Invalid method")
+
+    def get_versions(self, request: Request, pk=None) -> Response:
+        versions = PluginVersion.objects.filter(plugin_id=pk)
+        serialized_plugin_versions = ReadOnlyPluginVersionSerializer(
+            versions, many=True
+        )
+        return Response(serialized_plugin_versions.data, status=status.HTTP_200_OK)
+
+    def post_version(self, request: Request, pk=None) -> Response:
+        plugin = get_object_or_404(Plugin, pk=pk)
+        serialized_data = AddPluginVersionSerializer(
+            data=request.data, context={"plugin": plugin}
+        )
+
         if not serialized_data.is_valid():
             return self.error_response(
-                "Error during plugin serialization", serialized_data.errors
+                "Error during plugin version serialization", serialized_data.errors
             )
 
-        plugin = serialized_data.save()
-        schema: Dict[str, Any] = serialized_data.validated_data.get("schema", {})
-
+        plugin_version: PluginVersion = serialized_data.save()
         # Keep tracking the composition of plugin in our databse
+        schema = plugin_version.schema
         if not schema:
             return self.success_response(
-                "Plugin registered but no schema provided", plugin
+                "Plugin Version registered but no schema provided", plugin_version
             )
 
         tables: List[Dict[str, Any]] = schema.get("tables", [])
         if not tables:
             return self.success_response(
-                "Plugin registered but schema is empty", plugin
+                "Plugin Version registered but schema is empty", plugin_version
             )
 
         try:
-            self._process_schema(plugin, tables)
+            self._process_schema(plugin_version, tables)
         except ValidationError as e:
             return self.error_response(
                 "Validation error during schema processing", e.detail
@@ -55,20 +80,16 @@ class PluginViewSet(viewsets.ModelViewSet, CustomResponseHandler):
 
         return self.success_response("Plugin registered and models created", plugin)
 
-    @action(detail=True, methods=[HTTPMethod.POST])
-    def create_schema(self, request, pk=None):
-        # Provide a new route that have the following endpoint:
-        # /api/plugins/<id>/create_schema
-        pass
-
-    def _process_schema(self, plugin, tables: List[Dict[str, Any]]) -> None:
+    def _process_schema(
+        self, plugin_version: PluginVersion, tables: List[Dict[str, Any]]
+    ) -> None:
         """Processes the schema, creating tables and columns dynamically."""
         for table in tables:
-            name = table.get("name")
+            name = table.get("name", None)
             if not name:
                 raise ValidationError("All tables must have a name")
 
-            dynamic_table = self._create_dynamic_table(plugin, name)
+            dynamic_table = self._create_dynamic_table(plugin_version, name)
 
             columns = table.get("columns", [])
             if not columns:
@@ -76,10 +97,10 @@ class PluginViewSet(viewsets.ModelViewSet, CustomResponseHandler):
 
             self._create_dynamic_columns(dynamic_table, columns)
 
-    def _create_dynamic_table(self, plugin, name: str):
+    def _create_dynamic_table(self, plugin_version, name: str):
         """Creates a dynamic table associated with the plugin."""
         serialized_table = DynamicTableSerializer(
-            data={"plugin": plugin.id, "name": name}
+            data={"plugin_version": plugin_version.id, "name": name}
         )
         if not serialized_table.is_valid():
             raise ValidationError(serialized_table.errors)
