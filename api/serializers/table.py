@@ -1,13 +1,15 @@
 from rest_framework import serializers
 
-from api.models.plugin import Plugin
+from api.models.plugin import PluginVersion
 from api.models.table import DynamicTable
 
 # Serializers define the API representation.
 
 
 class DynamicTableSerializer(serializers.ModelSerializer):
-    plugin = serializers.PrimaryKeyRelatedField(queryset=Plugin.objects.all())
+    plugin_version = serializers.PrimaryKeyRelatedField(
+        queryset=PluginVersion.objects.all()
+    )
 
     class Meta:
         model = DynamicTable
