@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models.server import Server
-from api.serializers.plugin import PluginSerializer
+from api.serializers.plugin import ReadOnlyPluginSerializer
 from api.serializers.server import AddPluginSerializer
 from api.utils import CustomResponseHandler
 
@@ -19,7 +19,7 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         if not server.plugins.exists():
             return self.error_response("No plugins found for the given server")
 
-        serialized_plugins = PluginSerializer(server.plugins, many=True)
+        serialized_plugins = ReadOnlyPluginSerializer(server.plugins, many=True)
 
         return Response(
             {
