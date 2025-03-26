@@ -1,11 +1,11 @@
 from django.db import models
 
-from .plugin import Plugin
+from .plugin import PluginVersion
 
 
 class DynamicTable(models.Model):
     def __str__(self) -> str:
-        return f"{self.plugin.name}_{self.name}"
+        return f"{self.plugin_version}_{self.name}"
 
     name = models.CharField(max_length=256)
-    plugin = models.ForeignKey(Plugin, on_delete=models.CASCADE)
+    plugin_version = models.ForeignKey(PluginVersion, on_delete=models.CASCADE)

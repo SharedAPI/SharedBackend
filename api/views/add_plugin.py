@@ -5,8 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models.server import Server
-from api.serializers.plugin import ReadOnlyPluginSerializer
-from api.serializers.server import AddPluginSerializer
+from api.serializers.plugin import ReadOnlyPluginVersionSerializer, AddPluginSerializer
 from api.utils import CustomResponseHandler
 
 
@@ -16,10 +15,12 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         server = get_object_or_404(Server, pk=server_id)
 
         # If no plugins are associated with the server
-        if not server.plugins.exists():
+        if not server.plugin_versions.exists():
             return self.error_response("No plugins found for the given server")
 
-        serialized_plugins = ReadOnlyPluginSerializer(server.plugins, many=True)
+        serialized_plugins = ReadOnlyPluginVersionSerializer(
+            server.plugin_versions, many=True
+        )
 
         return Response(
             {
@@ -39,7 +40,7 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         if not plugin_id:
             return self.error_response("Plugin ID is required")
 
-        if server.plugins.filter(id=plugin_id).exists():
+        if server.plugin_versions.filter(id=plugin_id).exists():
             return self.error_response("Plugin already added to the server")
 
         serializer = AddPluginSerializer(data=request.data, context={"server": server})
