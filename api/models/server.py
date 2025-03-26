@@ -28,10 +28,9 @@ class ServerPlugins(models.Model):
     start_date = models.DateTimeField()
     expire_date = models.DateTimeField(default=timezone.now() + timedelta(30))
 
-    def create(self, *args, **kwargs):
+    def save(self, *args, **kwargs):
         if not self.token:
             self.token = secrets.token_hex(8)
-            self.start_date = timezone.now()
         if not self.expire_date:
             self.expire_date = timezone.now() + timedelta(30)
         super().save(*args, **kwargs)
