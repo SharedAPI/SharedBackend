@@ -1,9 +1,7 @@
 from rest_framework import serializers
+from api.models.pack import Pack, PackAndPlugins
 from api.models.plugin import Plugin, PluginVersion
 from django.utils import timezone
-
-
-from api.models.server import ServerPluginsVersion
 
 
 # Serializers define the API representation.
@@ -48,15 +46,23 @@ class AddPluginVersionSerializer(serializers.ModelSerializer):
 
 
 class AddPluginSerializer(serializers.Serializer):
-    plugin_version = serializers.PrimaryKeyRelatedField(queryset=PluginVersion.objects.all())
+    plugin_version = serializers.PrimaryKeyRelatedField(
+        queryset=PluginVersion.objects.all()
+    )
     start_date = serializers.DateTimeField(default=timezone.now())
 
     def create(self, validated_data):
         server = self.context["server"]
         plugin_version = validated_data["plugin_version"]
         start_date = validated_data["start_date"]
-        server_plugin, _ = ServerPluginsVersion.objects.get_or_create(
-            server=server, plugin_version=plugin_version, start_date=start_date
+        if not server.pack:
+            to_create_pack = Pack.objects.create(billing_date=start_date)
+            server.pack = to_create_pack
+            server.save()
+
+        pack = server.pack
+        pack_plugins, _ = PackAndPlugins.objects.get_or_create(
+            pack=pack, plugin_version=plugin_version, start_date=start_date
         )
 
-        return server_plugin
+        return pack_plugins
