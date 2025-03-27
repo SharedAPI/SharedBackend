@@ -26,6 +26,21 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name="Pack",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("billing_date", models.DateField()),
+            ],
+        ),
+        migrations.CreateModel(
             name="Plugin",
             fields=[
                 (
@@ -39,21 +54,6 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=256)),
                 ("description", models.CharField(max_length=4096)),
-            ],
-        ),
-        migrations.CreateModel(
-            name="Server",
-            fields=[
-                (
-                    "id",
-                    models.UUIDField(
-                        default=uuid.uuid4,
-                        editable=False,
-                        primary_key=True,
-                        serialize=False,
-                    ),
-                ),
-                ("name", models.CharField(max_length=256)),
             ],
         ),
         migrations.CreateModel(
@@ -93,6 +93,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("version", models.CharField(max_length=32)),
+                ("deprecated", models.BooleanField(default=False)),
                 ("schema", models.JSONField(blank=True, null=True)),
                 (
                     "plugin",
@@ -102,15 +103,8 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.AddField(
-            model_name="dynamictable",
-            name="plugin_version",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="api.pluginversion"
-            ),
-        ),
         migrations.CreateModel(
-            name="ServerPluginsVersion",
+            name="PackAndPlugins",
             fields=[
                 (
                     "id",
@@ -123,7 +117,13 @@ class Migration(migrations.Migration):
                 ),
                 ("token", models.CharField(blank=True, max_length=16, null=True)),
                 ("start_date", models.DateTimeField()),
-                ("expire_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField()),
+                (
+                    "pack",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT, to="api.pack"
+                    ),
+                ),
                 (
                     "plugin_version",
                     models.ForeignKey(
@@ -131,21 +131,43 @@ class Migration(migrations.Migration):
                         to="api.pluginversion",
                     ),
                 ),
-                (
-                    "server",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.RESTRICT, to="api.server"
-                    ),
-                ),
             ],
         ),
         migrations.AddField(
-            model_name="server",
+            model_name="pack",
             name="plugin_versions",
             field=models.ManyToManyField(
-                related_name="servers",
-                through="api.ServerPluginsVersion",
+                related_name="packs",
+                through="api.PackAndPlugins",
                 to="api.pluginversion",
             ),
+        ),
+        migrations.AddField(
+            model_name="dynamictable",
+            name="plugin_version",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="api.pluginversion"
+            ),
+        ),
+        migrations.CreateModel(
+            name="Server",
+            fields=[
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=256)),
+                (
+                    "pack",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="api.pack"
+                    ),
+                ),
+            ],
         ),
     ]

@@ -8,4 +8,4 @@ from api.models.server import Server
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
-        exclude = ["plugin_versions"]
+        exclude = ["pack"]

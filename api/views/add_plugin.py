@@ -15,11 +15,11 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         server = get_object_or_404(Server, pk=server_id)
 
         # If no plugins are associated with the server
-        if not server.plugin_versions.exists():
+        if not server.pack or not server.pack.plugin_versions.exists():
             return self.error_response("No plugins found for the given server")
 
         serialized_plugins = ReadOnlyPluginVersionSerializer(
-            server.plugin_versions, many=True
+            server.pack.plugin_versions, many=True
         )
 
         return Response(
@@ -40,7 +40,10 @@ class ServersPluginManagementView(APIView, CustomResponseHandler):
         if not plugin_version_id:
             return self.error_response("Plugin Version ID is required")
 
-        if server.plugin_versions.filter(id=plugin_version_id).exists():
+        if (
+            server.pack
+            and server.pack.plugin_versions.filter(id=plugin_version_id).exists()
+        ):
             return self.error_response("Plugin already added to the server")
 
         serializer = AddPluginSerializer(data=request.data, context={"server": server})
